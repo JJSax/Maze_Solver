@@ -1,68 +1,52 @@
 local lg = love.graphics
 
+local Tiles = require "libraries.luatile.grid"
+local tiles
+
 local canvas, mazedata, maze, startPoint
+local mazeImage, mazeData, currentPath
 
 local lineWidth = 2
-local boxSize -- includes walls
+local boxSize = 8-- includes walls
 local pathColor = {1, 1, 1, 1}
 
-local function drawCanvas()
-	local scale = 0.5
-	lg.setCanvas(canvas)
-	lg.draw(maze, 0, 0, 0, scale)
-	lg.setCanvas()
-	mazedata = canvas:newImageData()
-end
-
 function love.load()
-	love.window.setMode(1200, 1000)
-	maze = lg.newImage("maze.png")
-	local mw, mh = maze:getDimensions()
-	local scale = 0.5
-	canvas = lg.newCanvas(mw * scale, mh * scale)
+	mazeImage = lg.newImage("maze.png")
+	mazeData = love.image.newImageData("maze.png")
 
-	drawCanvas()
+	-- Keep track of the current path
+	currentPath = {}
 
+	local dw, dh = mazeData:getDimensions()
+    tiles = Tiles.new(require("tile").new, dw / boxSize, dh / boxSize)
 
-
-	for i = 1, mazedata:getWidth() - 1 do
-		local r, g, b = mazedata:getPixel(i, 1)
-		if r + g + b == 3 then
-			startPoint = i
-			boxSize = 1 -- account for wall pixel
-			for i = i, i + 1000 do
-				local r, g, b = mazedata:getPixel(i, 1)
-				boxSize = boxSize + 1
-				if r+g+b < 3 or boxSize > mw then
-					break
-				end
-			end
-			break
-		end
-	end
-
-	-- print(mazedata:getPixel(0, 5))
-	-- print(mazedata:getPixel(1, 5))
-	-- print(mazedata:getPixel(2, 5))
-    -- print(mazedata:getPixel(3, 5))
-	-- print(boxSize)
+	lg.setBackgroundColor(1,1,1)
 end
 
 function love.update(dt)
-
+	-- Your pathfinding algorithm here, updating currentPath
+	-- For simplicity, I'm just updating it randomly here
+	if love.timer.getTime() % 2 < 1 then
+		table.insert(currentPath, {x = math.random(1, mazeImage:getWidth()), y = math.random(1, mazeImage:getHeight())})
+	else
+		table.remove(currentPath)
+	end
 end
 
 function love.draw()
-	lg.setColor(1,1,1)
-	lg.draw(canvas)
+    -- lg.draw(mazeImage, 0, 0)
+	for cell, x, y in tiles:iterate() do
+		cell:draw()
+	end
 
+	-- Visualize the current path
+	-- for _, point in ipairs(currentPath) do
+	-- 	mazeData:setPixel(point.x, point.y, 255, 0, 0) -- Red color for the path
+	-- end
 
-	lg.setCanvas(canvas)
-	lg.setColor(math.random(), math.random(), math.random())
-	lg.points(math.random(0, 600), math.random(0, 600))
-	lg.setCanvas()
-	-- mazedata:setPixel(math.random(0, 600), math.random(0, 600), math.random(), math.random(), math.random())
-	-- drawCanvas()
+	-- Apply changes to the displayed image
+	-- lg.clear()
+	-- lg.draw(lg.newImage(mazeData))
 end
 
 function love.keypressed(key) end
