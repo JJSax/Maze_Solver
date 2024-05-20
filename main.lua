@@ -1,32 +1,32 @@
 local lg = love.graphics
 
 local Tiles = require "libraries.luatile.grid"
-local tiles
+local grid
+local path
 
-local currentPath
-local MOVETIMER = 2
+local MOVETIMER = 0.3
 local moveTimer = MOVETIMER
 
-local boxSize = 8-- includes walls
-local pathColor = { 1, 1, 1, 1 }
-local moveSpeed = 150
-local offset = {x = 0, y = 0}
+local boxSize = 16-- includes walls
+local moveSpeed = 350
+local offset = {x = -600, y = 0}
 
 function love.load()
 	local mazeData = love.image.newImageData("maze.png")
 
-	-- Keep track of the current path
-	currentPath = {}
-
 	local dw, dh = mazeData:getDimensions()
-	tiles = Tiles.new(require("tile").new, dw / boxSize, dh / boxSize)
-	for tx = 1, #tiles.tiles do
-		if not tiles(tx, 1).walls[1] then
-			currentPath[1] = tiles(tx, 1)
+	local start
+	grid = Tiles.new(require("tile"), math.floor(dw / boxSize), math.floor(dh / boxSize), true)
+	for tx = 1, #grid.tiles do
+		if not grid(tx, 1).walls[1] then
+			start = grid(tx, 1)
 			break
 		end
-
 	end
+
+	path = require ("dfs").create(grid, start)
+
+	grid.path = path
 
 	lg.setBackgroundColor(1,1,1)
 end
@@ -34,10 +34,10 @@ end
 function love.update(dt)
 	-- Your pathfinding algorithm here, updating currentPath
 	-- For simplicity, I'm just updating it randomly here
-	if love.timer.getTime() % 2 < 1 then
-		-- table.insert(currentPath, {x = math.random(1, mazeImage:getWidth()), y = math.random(1, mazeImage:getHeight())})
-	else
-		-- table.remove(currentPath)
+	moveTimer = moveTimer - dt
+	if moveTimer < 0 then
+		moveTimer = MOVETIMER
+		path:step()
 	end
 
 	if love.keyboard.isDown("w") then
@@ -59,19 +59,18 @@ function love.draw()
 	lg.translate(offset.x, offset.y)
 
 	local DBG = 0
-    for cell, x, y in tiles:iterate() do
-        local tx, ty = lg.transformPoint(cell.vx, cell.vy)
-        if tx + boxSize > 0 and tx < lg.getWidth()
+	for cell, x, y in grid:iterate() do
+		local tx, ty = lg.transformPoint(cell.vx, cell.vy)
+		if tx + boxSize > 0 and tx < lg.getWidth()
 		and ty + boxSize > 0 and ty < lg.getHeight() then
 			DBG = DBG + 1
 			cell:draw()
 		end
 	end
-
-	-- Apply changes to the displayed image
-    lg.pop()
+	lg.pop()
 	lg.setColor(0,0,0)
-	lg.print(DBG)
+	-- lg.print(DBG)
+	lg.print(path.currentTile.x .. ": ".. path.currentTile.y)
 end
 
 function love.keypressed(key) end
