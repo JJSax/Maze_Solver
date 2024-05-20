@@ -2,9 +2,11 @@
 ---@field vx number World x coordinate.
 ---@field vy number World y coordinate.
 
+local cfg = require "settings"
+
 local tile = {}
 tile.__index = tile
-local boxSize = 16-- includes walls
+local boxSize = cfg.boxSize -- includes walls
 
 local lg = love.graphics
 

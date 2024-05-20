@@ -1,0 +1,17 @@
+
+local MOVETIMER = 0.3
+
+return {
+	-- pathfinder
+	MOVETIMER = MOVETIMER,
+	DEADENDTIMER = 0.1,
+	moveTimer = MOVETIMER,
+	timerReset = MOVETIMER,
+	hypermode = false,
+
+	-- user
+	moveSpeed = 350,
+
+	-- tiles
+	boxSize = 16
+}

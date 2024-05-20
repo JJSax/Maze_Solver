@@ -1,30 +1,36 @@
 local lg = love.graphics
+local cfg = require "settings"
 
 local Tiles = require "libraries.luatile.grid"
-local grid
-local path
+local grid, path
 
-local MOVETIMER = 0.3
-local moveTimer = MOVETIMER
-
-local boxSize = 16-- includes walls
-local moveSpeed = 350
-local offset = {x = -600, y = 0}
+local boxSize = cfg.boxSize -- includes walls
+local moveSpeed = cfg.moveSpeed
+local camera = {x = -600, y = 0, scale = 1}
 
 function love.load()
 	local mazeData = love.image.newImageData("maze.png")
 
 	local dw, dh = mazeData:getDimensions()
-	local start
-	grid = Tiles.new(require("tile"), math.floor(dw / boxSize), math.floor(dh / boxSize), true)
+	local mw, mh = math.floor(dw / boxSize), math.floor(dh / boxSize)
+	local start, finish
+	grid = Tiles.new(require("tile"), mw, mh, true)
+	local af, bf = false, false
 	for tx = 1, #grid.tiles do
-		if not grid(tx, 1).walls[1] then
+		if not af and not grid(tx, 1).walls[1] then
 			start = grid(tx, 1)
-			break
+			af = true
 		end
+
+		if not bf and not grid(tx, #grid.tiles[1]).walls[3] then
+			finish = grid(tx, mh)
+			bf = true
+		end
+
+		if af and bf then break end
 	end
 
-	path = require ("dfs").create(grid, start)
+	path = require ("dfs").create(grid, start, finish)
 
 	grid.path = path
 
@@ -34,29 +40,56 @@ end
 function love.update(dt)
 	-- Your pathfinding algorithm here, updating currentPath
 	-- For simplicity, I'm just updating it randomly here
-	moveTimer = moveTimer - dt
-	if moveTimer < 0 then
-		moveTimer = MOVETIMER
+
+
+	cfg.moveTimer = cfg.moveTimer - dt
+	if cfg.moveTimer < 0 then
+		local div = love.keyboard.isDown("space") and 4 or 1
+		if cfg.hypermode then
+			div = div * 10
+		end
+		cfg.moveTimer = cfg.timerReset / div
 		path:step()
 	end
 
 	if love.keyboard.isDown("w") then
-		offset.y = offset.y + moveSpeed * dt
+		camera.y = camera.y + moveSpeed * dt
 	end
 	if love.keyboard.isDown("a") then
-		offset.x = offset.x + moveSpeed * dt
+		camera.x = camera.x + moveSpeed * dt
 	end
 	if love.keyboard.isDown("s") then
-		offset.y = offset.y - moveSpeed * dt
+		camera.y = camera.y - moveSpeed * dt
 	end
 	if love.keyboard.isDown("d") then
-		offset.x = offset.x - moveSpeed * dt
+		camera.x = camera.x - moveSpeed * dt
 	end
+end
+
+-- This function returns a new scale value based on the input delta and current scale
+-- It ensures the scale stays within reasonable limits.
+local function adjustScale(currentScale, delta, minScale, maxScale)
+	-- Set default min and max scales if not provided
+	minScale = minScale or 0.1
+	maxScale = maxScale or 5.0
+
+	-- Adjust scale by a factor based on the delta
+	local factor = 1.1 -- Adjust this factor for smoother or more aggressive scaling
+	if delta > 0 then
+		currentScale = currentScale * factor
+	elseif delta < 0 then
+		currentScale = currentScale / factor
+	end
+
+	currentScale = math.max(minScale, math.min(currentScale, maxScale))
+
+	return currentScale
 end
 
 function love.draw()
 	lg.push("all")
-	lg.translate(offset.x, offset.y)
+	lg.translate(camera.x, camera.y)
+	lg.scale(camera.scale)
 
 	local DBG = 0
 	for cell, x, y in grid:iterate() do
@@ -73,10 +106,26 @@ function love.draw()
 	lg.print(path.currentTile.x .. ": ".. path.currentTile.y)
 end
 
-function love.keypressed(key) end
+function love.keypressed(key)
+	if key == "h" then
+		-- hypermode
+		cfg.hypermode = not cfg.hypermode
+	end
+end
 function love.keyreleased(key) end
 function love.mousepressed(x, y, button, istouch, presses) end
 function love.mousereleased(x, y, button, istouch, presses) end
 function love.mousemoved(x, y, dx, dy, istouch) end
-function love.wheelmoved(x, y) end
+function love.wheelmoved(x, y)
+	if y ~= 0 then
+		local oldScale = camera.scale
+		camera.scale = adjustScale(camera.scale, y, 0.1, 5.0)
+		-- Adjust camera position to keep the center of the screen in view
+		local mx, my = love.mouse.getPosition()
+		local dx = mx / love.graphics.getWidth() - 0.5
+		local dy = my / love.graphics.getHeight() - 0.5
+		camera.x = camera.x + dx * (1 / oldScale - 1 / camera.scale) * love.graphics.getWidth()
+		camera.y = camera.y + dy * (1 / oldScale - 1 / camera.scale) * love.graphics.getHeight()
+	end
+end
 function love.textinput(text) end
