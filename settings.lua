@@ -11,6 +11,7 @@ return {
 
 	-- user
 	moveSpeed = 350,
+	paused = false,
 
 	-- tiles
 	boxSize = 16

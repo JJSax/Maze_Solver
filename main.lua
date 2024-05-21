@@ -6,7 +6,7 @@ local grid, path
 
 local boxSize = cfg.boxSize -- includes walls
 local moveSpeed = cfg.moveSpeed
-local camera = {x = -600, y = 0, scale = 1}
+local camera = {x = -800, y = 0, scale = 1}
 
 function love.load()
 	local mazeData = love.image.newImageData("maze.png")
@@ -30,7 +30,7 @@ function love.load()
 		if af and bf then break end
 	end
 
-	path = require ("bfs").create(grid, start, finish)
+	path = require("pathing.dfs").create(grid, start, finish)
 
 	grid.path = path
 
@@ -43,7 +43,7 @@ function love.update(dt)
 
 
 	cfg.moveTimer = cfg.moveTimer - dt
-	if cfg.moveTimer < 0 then
+	if cfg.moveTimer < 0 and not cfg.paused then
 		local div = love.keyboard.isDown("space") and 4 or 1
 		if cfg.hypermode then
 			div = div * 10
@@ -102,12 +102,14 @@ function love.draw()
 	end
 	lg.pop()
 	lg.setColor(0,0,0)
-	-- lg.print(DBG)
-	lg.print(path.currentTile.x .. ": ".. path.currentTile.y)
+	lg.print(DBG)
+	-- lg.print(path.currentTile.x .. ": ".. path.currentTile.y)
 end
 
 function love.keypressed(key)
-		if key == "h" then
+	if key == "p" then
+		cfg.paused = not cfg.paused
+	elseif key == "h" then
 		-- hypermode
 		cfg.hypermode = not cfg.hypermode
 	end
