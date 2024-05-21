@@ -30,7 +30,7 @@ function love.load()
 		if af and bf then break end
 	end
 
-	path = require ("dfs").create(grid, start, finish)
+	path = require ("bfs").create(grid, start, finish)
 
 	grid.path = path
 
@@ -107,7 +107,7 @@ function love.draw()
 end
 
 function love.keypressed(key)
-	if key == "h" then
+		if key == "h" then
 		-- hypermode
 		cfg.hypermode = not cfg.hypermode
 	end

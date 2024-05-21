@@ -19,8 +19,4 @@ function JJDFS:exploreTile(tile)
 	cfg.timerReset = cfg.MOVETIMER
 end
 
--- function JJDFS:isTarget(tile)
--- 	return tile == self.target
--- end
-
 return JJDFS

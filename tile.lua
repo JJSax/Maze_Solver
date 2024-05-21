@@ -9,8 +9,6 @@ tile.__index = tile
 local boxSize = cfg.boxSize -- includes walls
 
 local lg = love.graphics
-
--- local mazeImage = lg.newImage("maze.png")
 local mazeData = love.image.newImageData("maze.png")
 
 function tile.new(grid, x, y)
