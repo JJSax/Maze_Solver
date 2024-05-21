@@ -1,12 +1,13 @@
 local lg = love.graphics
 local cfg = require "settings"
 
-local Tiles = require "libraries.luatile.grid"
+local Tiles = require "libraries.luatile.init"
 local grid, path
 
 local boxSize = cfg.boxSize -- includes walls
 local moveSpeed = cfg.moveSpeed
 local camera = {x = -800, y = 0, scale = 1}
+local pathPos
 
 function love.load()
 	local mazeData = love.image.newImageData("maze.png")
@@ -30,7 +31,7 @@ function love.load()
 		if af and bf then break end
 	end
 
-	path = require("pathing.dfs").create(grid, start, finish)
+	path = require("pathing.astar").create(grid, start, finish)
 
 	grid.path = path
 
@@ -41,15 +42,26 @@ function love.update(dt)
 	-- Your pathfinding algorithm here, updating currentPath
 	-- For simplicity, I'm just updating it randomly here
 
-
 	cfg.moveTimer = cfg.moveTimer - dt
-	if cfg.moveTimer < 0 and not cfg.paused then
+	if cfg.moveTimer < 0 and path.complete then
+		cfg.moveTimer = 0.1
+		pathPos = pathPos + 1
+		if pathPos > #path.path then
+			pathPos = 1
+		end
+	end
+
+	if cfg.moveTimer < 0 and not cfg.paused and not path.complete then
 		local div = love.keyboard.isDown("space") and 4 or 1
 		if cfg.hypermode then
 			div = div * 10
 		end
 		cfg.moveTimer = cfg.timerReset / div
-		path:step()
+		-- path:step()
+		path:run()
+		if path.complete then
+			pathPos = 1
+		end
 	end
 
 	if love.keyboard.isDown("w") then
@@ -100,10 +112,20 @@ function love.draw()
 			cell:draw()
 		end
 	end
+
+	if path.complete then
+		lg.setColor(1,1,1, 0.8)
+
+		lg.rectangle("fill", path.path[pathPos].vx, path.path[pathPos].vy, cfg.boxSize, cfg.boxSize)
+	end
+
 	lg.pop()
 	lg.setColor(0,0,0)
-	lg.print(DBG)
+	-- lg.print(DBG)
 	-- lg.print(path.currentTile.x .. ": ".. path.currentTile.y)
+	if path.complete then
+		lg.print(path.path[pathPos].x .. ": ".. path.path[pathPos].y)
+	end
 end
 
 function love.keypressed(key)
