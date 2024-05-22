@@ -1,22 +1,20 @@
+local cfg = require "settings"
+local lt = require "libraries.luatile.tile"
+
 ---@class Tile : LTTile
 ---@field vx number World x coordinate.
 ---@field vy number World y coordinate.
-
-local cfg = require "settings"
-
-local tile = {}
+---@field walls table<number, boolean> The list from top and clockwise if it has a wall
+---@field color table The color
+local tile = setmetatable({}, {__index = lt})
 tile.__index = tile
 local boxSize = cfg.boxSize -- includes walls
 
 local lg = love.graphics
-local mazeData = love.image.newImageData("maze.png")
+local mazeData = love.image.newImageData(cfg.mazeImgPath)
 
 function tile.new(grid, x, y)
-	local self = setmetatable({}, tile)
-	self.grid = grid
-
-	self.x = x
-	self.y = y
+	local self = setmetatable(lt.new(grid, x, y), tile)
 	self.vx = (x - 1) * boxSize
 	self.vy = (y - 1) * boxSize
 

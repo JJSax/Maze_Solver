@@ -14,4 +14,9 @@ function JJBFS:exploreTile(tile)
 	cfg.timerReset = cfg.MOVETIMER
 end
 
+function JJBFS:markDeadEnd(tile)
+	tile.color = {.2, 0.22, 0.22}
+	cfg.timerReset = cfg.DEADENDTIMER
+end
+
 return JJBFS

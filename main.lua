@@ -10,12 +10,12 @@ local camera = {x = -800, y = 0, scale = 1}
 local pathPos
 
 function love.load()
-	local mazeData = love.image.newImageData("maze.png")
+	local mazeData = love.image.newImageData(cfg.mazeImgPath)
 
 	local dw, dh = mazeData:getDimensions()
 	local mw, mh = math.floor(dw / boxSize), math.floor(dh / boxSize)
-	local start, finish
 	grid = Tiles.new(require("tile"), mw, mh, true)
+	local start, finish
 	local af, bf = false, false
 	for tx = 1, #grid.tiles do
 		if not af and not grid(tx, 1).walls[1] then
@@ -30,8 +30,10 @@ function love.load()
 
 		if af and bf then break end
 	end
+	camera.x = lg.getWidth() /2 - start.vx
+	camera.y = lg.getHeight()/2 - start.vy
 
-	path = require("pathing.astar").create(grid, start, finish)
+	path = require("pathing.dfs").create(grid, start, finish)
 
 	grid.path = path
 
@@ -39,9 +41,6 @@ function love.load()
 end
 
 function love.update(dt)
-	-- Your pathfinding algorithm here, updating currentPath
-	-- For simplicity, I'm just updating it randomly here
-
 	cfg.moveTimer = cfg.moveTimer - dt
 	if cfg.moveTimer < 0 and path.complete then
 		cfg.moveTimer = 0.1
@@ -57,8 +56,8 @@ function love.update(dt)
 			div = div * 10
 		end
 		cfg.moveTimer = cfg.timerReset / div
-		-- path:step()
-		path:run()
+		path:step()
+		-- path:run()
 		if path.complete then
 			pathPos = 1
 		end
@@ -106,8 +105,8 @@ function love.draw()
 	local DBG = 0
 	for cell, x, y in grid:iterate() do
 		local tx, ty = lg.transformPoint(cell.vx, cell.vy)
-		if tx + boxSize > 0 and tx < lg.getWidth()
-		and ty + boxSize > 0 and ty < lg.getHeight() then
+		if  tx + boxSize * camera.scale > 0 and tx < lg.getWidth()
+		and ty + boxSize * camera.scale > 0 and ty < lg.getHeight() then
 			DBG = DBG + 1
 			cell:draw()
 		end
