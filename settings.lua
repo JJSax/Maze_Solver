@@ -13,6 +13,7 @@ return {
 	moveSpeed = 350,
 	paused = false,
 	mazeImgPath = "mazes/maze.png",
+	stepsPerFrame = 1,
 
 	-- tiles
 	boxSize = 16

@@ -15,6 +15,8 @@ function love.load()
 	local dw, dh = mazeData:getDimensions()
 	local mw, mh = math.floor(dw / boxSize), math.floor(dh / boxSize)
 	grid = Tiles.new(require("tile"), mw, mh, true)
+	grid.width = mw
+	grid.height = mh
 	local start, finish
 	local af, bf = false, false
 	for tx = 1, #grid.tiles do
@@ -56,7 +58,9 @@ function love.update(dt)
 			div = div * 10
 		end
 		cfg.moveTimer = cfg.timerReset / div
-		path:step()
+		for _ = 1, cfg.stepsPerFrame do
+			path:step()
+		end
 		-- path:run()
 		if path.complete then
 			pathPos = 1
@@ -133,6 +137,11 @@ function love.keypressed(key)
 	elseif key == "h" then
 		-- hypermode
 		cfg.hypermode = not cfg.hypermode
+	elseif key == "up" then
+		cfg.stepsPerFrame = cfg.stepsPerFrame + 1
+	elseif key == "down" then
+		cfg.stepsPerFrame = cfg.stepsPerFrame - 1
+		if cfg.stepsPerFrame < 1 then cfg.stepsPerFrame = 1 end
 	end
 end
 function love.keyreleased(key) end
@@ -140,15 +149,15 @@ function love.mousepressed(x, y, button, istouch, presses) end
 function love.mousereleased(x, y, button, istouch, presses) end
 function love.mousemoved(x, y, dx, dy, istouch) end
 function love.wheelmoved(x, y)
-	if y ~= 0 then
-		local oldScale = camera.scale
-		camera.scale = adjustScale(camera.scale, y, 0.1, 5.0)
-		-- Adjust camera position to keep the center of the screen in view
-		local mx, my = love.mouse.getPosition()
-		local dx = mx / love.graphics.getWidth() - 0.5
-		local dy = my / love.graphics.getHeight() - 0.5
-		camera.x = camera.x + dx * (1 / oldScale - 1 / camera.scale) * love.graphics.getWidth()
-		camera.y = camera.y + dy * (1 / oldScale - 1 / camera.scale) * love.graphics.getHeight()
-	end
+	if y == 0 then return end
+
+	local oldScale = camera.scale
+	camera.scale = adjustScale(camera.scale, y, 0.1, 5.0)
+	-- Adjust camera position to keep the center of the screen in view
+	local mx, my = love.mouse.getPosition()
+	local dx = mx / love.graphics.getWidth() - 0.5
+	local dy = my / love.graphics.getHeight() - 0.5
+	camera.x = camera.x + dx * (1 / oldScale - 1 / camera.scale) * love.graphics.getWidth()
+	camera.y = camera.y + dy * (1 / oldScale - 1 / camera.scale) * love.graphics.getHeight()
 end
 function love.textinput(text) end
