@@ -1,6 +1,6 @@
 
-local cfg = require "settings"
 local OGDFS = require "libraries.luatile.dfs"
+local cfg = require "settings"
 
 local JJDFS = setmetatable({}, { __index = OGDFS})
 JJDFS.__index = JJDFS

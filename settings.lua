@@ -13,6 +13,8 @@ return {
 	moveSpeed = 350,
 	paused = false,
 	mazeImgPath = "mazes/maze.png",
+	-- mazeImgPath = "mazes/maze40.png",
+	-- mazeImgPath = "mazes/10-10maze.png",
 	stepsPerFrame = 1,
 
 	-- tiles
