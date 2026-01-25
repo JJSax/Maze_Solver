@@ -1,3 +1,6 @@
 [submodule "libraries/luatile"]
 	path = libraries/luatile
 	url = https://github.com/JJSax/lautile.git
+[submodule "libraries/tablua"]
+	path = libraries/tablua
+	url = https://github.com/JJSax/Tablua.git

@@ -1,3 +1,6 @@
+
+-- do require "libraries.luatile.examples.example1.example1" return end
+
 local lg = love.graphics
 local cfg = require "settings"
 
@@ -9,7 +12,7 @@ local moveSpeed = cfg.moveSpeed
 local camera = {x = -800, y = 0, scale = 1}
 local pathPos
 
-function love.load()
+local function genMaze()
 	local mazeData = love.image.newImageData(cfg.mazeImgPath)
 
 	local dw, dh = mazeData:getDimensions()
@@ -32,12 +35,17 @@ function love.load()
 
 		if af and bf then break end
 	end
-	camera.x = lg.getWidth() /2 - start.vx
-	camera.y = lg.getHeight()/2 - start.vy
-
 	path = require("pathing.dfs").create(grid, start, finish)
 
 	grid.path = path
+
+	return start
+end
+
+function love.load()
+	local start = genMaze()
+	camera.x = lg.getWidth() /2 - start.vx
+	camera.y = lg.getHeight()/2 - start.vy
 
 	lg.setBackgroundColor(1,1,1)
 end
@@ -47,6 +55,7 @@ function love.update(dt)
 	if cfg.moveTimer < 0 and path.complete then
 		cfg.moveTimer = 0.1
 		pathPos = pathPos + 1
+		path.currentTile = path.path[pathPos]
 		if pathPos > #path.path then
 			pathPos = 1
 		end
@@ -142,6 +151,8 @@ function love.keypressed(key)
 	elseif key == "down" then
 		cfg.stepsPerFrame = cfg.stepsPerFrame - 1
 		if cfg.stepsPerFrame < 1 then cfg.stepsPerFrame = 1 end
+	elseif key == "r" then
+		genMaze()
 	end
 end
 function love.keyreleased(key) end
