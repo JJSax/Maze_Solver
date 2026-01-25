@@ -1,0 +1,9 @@
+
+add tests
+add examples
+
+astar has lambda sort function, find way to set that func once
+better is to find the least via single loop for openList
+look into building my own heap / priority queue / openList
+
+check out best first search (hillclimbing)
