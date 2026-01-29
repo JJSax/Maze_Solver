@@ -15,6 +15,8 @@ local mazeData = love.image.newImageData(cfg.mazeImgPath)
 
 function tile.new(grid, x, y)
 	local self = setmetatable(lt.new(grid, x, y), tile)
+
+	-- set relative visual coordinates.
 	self.vx = (x - 1) * boxSize
 	self.vy = (y - 1) * boxSize
 
@@ -41,16 +43,8 @@ function tile.new(grid, x, y)
 end
 
 function tile:draw()
-
-	local draw
-	if self == self.grid.path.currentTile then
-		lg.setColor(1,0.5,0.5)
-		draw = true
-	elseif self.color then
+	if self.color then
 		lg.setColor(self.color)
-		draw = true
-	end
-	if draw then
 		lg.rectangle("fill", self.vx, self.vy, boxSize, boxSize)
 	end
 

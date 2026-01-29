@@ -1,6 +1,8 @@
 
 local cfg = require "settings"
 local OGAS = require "libraries.luatile.astar"
+local minHeap = require "libraries.tablua.minHeap"
+OGAS.MinHeap = minHeap
 
 local JJStar = setmetatable({}, { __index = OGAS})
 JJStar.__index = JJStar

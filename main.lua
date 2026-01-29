@@ -125,9 +125,14 @@ function love.draw()
 		end
 	end
 
+	do -- Draw the current tile; prevents checking on every tile
+		local cur = path.currentTile
+		lg.setColor(1, 0.5, 0.5, 1)
+		lg.rectangle("fill", cur.vx , cur.vy , boxSize, boxSize)
+	end
+
 	if path.complete then
 		lg.setColor(1,1,1, 0.8)
-
 		lg.rectangle("fill", path.path[pathPos].vx, path.path[pathPos].vy, cfg.boxSize, cfg.boxSize)
 	end
 
