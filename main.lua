@@ -39,7 +39,7 @@ local function genMaze(reload)
 
 		if af and bf then break end
 	end
-	path = require("pathing.def").create(grid, start, finish)
+	path = require("pathing.dfs").create(grid, start, finish)
 
 	return start
 end
@@ -165,12 +165,16 @@ function love.wheelmoved(x, y)
 	if y == 0 then return end
 
 	local oldScale = camera.scale
-	camera.scale = adjustScale(camera.scale, y, 0.1, 5.0)
-	-- Adjust camera position to keep the center of the screen in view
 	local mx, my = love.mouse.getPosition()
-	local dx = mx / love.graphics.getWidth() - 0.5
-	local dy = my / love.graphics.getHeight() - 0.5
-	camera.x = camera.x + dx * (1 / oldScale - 1 / camera.scale) * love.graphics.getWidth()
-	camera.y = camera.y + dy * (1 / oldScale - 1 / camera.scale) * love.graphics.getHeight()
+	-- Convert mouse screen coords to world coords before scaling
+	local worldX = (mx - camera.x) / oldScale
+	local worldY = (my - camera.y) / oldScale
+
+	-- Update scale
+	camera.scale = adjustScale(camera.scale, y, 0.1, 5.0)
+
+	-- Reposition camera so the world point under the mouse remains under the mouse
+	camera.x = mx - worldX * camera.scale
+	camera.y = my - worldY * camera.scale
 end
 function love.textinput(text) end
