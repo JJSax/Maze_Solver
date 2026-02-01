@@ -13,9 +13,9 @@ local tile = setmetatable({}, {__index = lt})
 tile.__index = tile
 local boxSize = cfg.boxSize -- includes walls
 
-function tile.new(grid, x, y)
+function tile.new(x, y)
 	local mazeData = common.imageData
-	local self = setmetatable(lt.new(grid, x, y), tile)
+	local self = setmetatable(lt.new(x, y), tile)
 
 	-- set relative visual coordinates.
 	self.vx = (x - 1) * boxSize
@@ -46,17 +46,18 @@ function tile.new(grid, x, y)
 end
 
 local dirs = common.dirMap
-local function withWall(cur, offset)
-	local v = cur.grid:isValidCell(cur.x + dirs[offset].x, cur.y + dirs[offset].y)
+local function withWall(grid, cur, offset)
+	local v = grid:isValidCell(cur.x + dirs[offset].x, cur.y + dirs[offset].y)
 	if v and not Walls.has(cur.walls, 2^(offset-1)) then
 		return v
 	end
 	return nil
 end
-function tile:getNeighbors()
+---@deprecated Will move to a new Grid variant
+function tile:getNeighbors(grid)
 	local out = {}
 	for i = 1, 4 do
-		local c = withWall(self, i)
+		local c = withWall(grid, self, i)
 		if c then table.insert(out, c) end
 	end
 	return out

@@ -26,7 +26,6 @@ local function genMaze(reload)
 	local start, finish
 	local af, bf = false, false
 	for tx = 1, #grid.tiles do
-		-- if not af and not grid(tx, 1).walls[1] then
 		if not af and not Walls.has(grid(tx, 1).walls, Walls.TOP) then
 			start = grid(tx, 1)
 			af = true
@@ -39,7 +38,7 @@ local function genMaze(reload)
 
 		if af and bf then break end
 	end
-	path = require("pathing.bfs").create(grid, start, finish)
+	path = require("pathing.dfs").create(grid, start, finish)
 
 	return start
 end
@@ -72,7 +71,7 @@ function love.update(dt)
 		for _ = 1, cfg.stepsPerFrame do
 			path:step()
 		end
-		path:run()
+		-- path:run()
 		if path.complete then
 			pathPos = 1
 		end

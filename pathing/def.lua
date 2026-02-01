@@ -57,7 +57,7 @@ local function constructPath(self)
 	local path = {self.start}
 	local inPath = {[self.start] = true}
 	repeat
-		for i, tile in ipairs(currentTile:getNeighbors()) do
+		for i, tile in ipairs(currentTile:getNeighbors(self.grid)) do
 			if not inPath[tile] and not tile.deadEnd then
 				currentTile = tile
 				table.insert(path, currentTile)
@@ -81,9 +81,9 @@ function def:step()
 		end
 
 		-- look at adjacent tiles for tiles that will have 0 ways to go after this tile is marked as a dead end
-		for _, adjTile in ipairs(tile:getNeighbors()) do
+		for _, adjTile in ipairs(tile:getNeighbors(self.grid)) do
 			local options = 0
-			for _, d in ipairs(adjTile:getNeighbors()) do
+			for _, d in ipairs(adjTile:getNeighbors(self.grid)) do
 				if not d.deadEnd then
 					options = options + 1
 				end
