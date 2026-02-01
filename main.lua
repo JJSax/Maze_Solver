@@ -1,9 +1,8 @@
 
--- do require "libraries.luatile.examples.example1.example1" return end
-
 local lg = love.graphics
 local cfg = require "settings"
 local common = require "common"
+local Walls  = require "walls"
 
 local Tiles = require "libraries.luatile.init"
 local grid, path
@@ -27,19 +26,20 @@ local function genMaze(reload)
 	local start, finish
 	local af, bf = false, false
 	for tx = 1, #grid.tiles do
-		if not af and not grid(tx, 1).walls[1] then
+		-- if not af and not grid(tx, 1).walls[1] then
+		if not af and not Walls.has(grid(tx, 1).walls, Walls.TOP) then
 			start = grid(tx, 1)
 			af = true
 		end
 
-		if not bf and not grid(tx, #grid.tiles[1]).walls[3] then
+		if not bf and not Walls.has(grid(tx, #grid.tiles[1]).walls, Walls.BOTTOM) then
 			finish = grid(tx, mh)
 			bf = true
 		end
 
 		if af and bf then break end
 	end
-	path = require("pathing.dfs").create(grid, start, finish)
+	path = require("pathing.bfs").create(grid, start, finish)
 
 	return start
 end
@@ -72,7 +72,7 @@ function love.update(dt)
 		for _ = 1, cfg.stepsPerFrame do
 			path:step()
 		end
-		-- path:run()
+		path:run()
 		if path.complete then
 			pathPos = 1
 		end

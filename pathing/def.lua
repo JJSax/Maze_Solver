@@ -6,6 +6,7 @@
 local cfg = require "settings"
 local common = require "common"
 local Pathfinder = require "libraries.luatile.pathfinder"
+local walls      = require "walls"
 
 local def = setmetatable({}, { __index = Pathfinder })
 def.__index = def
@@ -20,7 +21,10 @@ function def.create(grid, startTile, target)
 	for x, v in ipairs(self.grid.tiles) do
 		for y, tile in ipairs(v) do
 			local open = 0
-			for dir, wall in ipairs(tile.walls) do
+			-- for dir, wall in ipairs(tile.walls) do
+			for i = 0, 3 do
+				local dir = i + 1
+				local wall = walls.has(tile.walls, 2^i)
 				if not wall then
 					local isValid = self.grid:isValidCell(x + dirMap[dir].x, y + dirMap[dir].y)
 					if not isValid or not self.grid(x + dirMap[dir].x, y + dirMap[dir].y).deadEnd then
