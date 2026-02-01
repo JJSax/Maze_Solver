@@ -10,13 +10,13 @@ function JJDFS.create(grid, startTile, target)
 end
 
 function JJDFS:markDeadEnd(tile)
-	tile.color = {.2, 0.22, 0.22}
+	tile:setColor({ .2, 0.22, 0.22 })
 	cfg.timerReset = cfg.DEADENDTIMER
 end
 
 function JJDFS:exploreTile(tile)
-	tile.color = {0,1,1}
 	cfg.timerReset = cfg.MOVETIMER
+	tile:setColor({ 0, 1, 1 })
 end
 
 return JJDFS

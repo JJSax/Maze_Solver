@@ -10,12 +10,12 @@ function JJBFS.create(grid, startTile, target)
 end
 
 function JJBFS:exploreTile(tile)
-	tile.color = {0,1,1}
+	tile:setColor({0,1,1})
 	cfg.timerReset = cfg.MOVETIMER
 end
 
 function JJBFS:markDeadEnd(tile)
-	tile.color = {.2, 0.22, 0.22}
+	tile:setColor({.2, 0.22, 0.22})
 	cfg.timerReset = cfg.DEADENDTIMER
 end
 

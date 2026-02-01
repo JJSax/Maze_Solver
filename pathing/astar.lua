@@ -12,7 +12,7 @@ function JJStar.create(grid, startTile, target)
 end
 
 function JJStar:exploreTile(tile)
-	tile.color = {0,1,1}
+	tile:setColor({0,1,1})
 	cfg.timerReset = cfg.MOVETIMER
 end
 

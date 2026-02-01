@@ -1,19 +1,17 @@
 local cfg = require "settings"
+local common = require "common"
 local lt = require "libraries.luatile.tile"
 
 ---@class Tile : LTTile
 ---@field vx number World x coordinate.
 ---@field vy number World y coordinate.
 ---@field walls table<number, boolean> The list from top and clockwise if it has a wall
----@field color table The color
 local tile = setmetatable({}, {__index = lt})
 tile.__index = tile
 local boxSize = cfg.boxSize -- includes walls
 
-local lg = love.graphics
-local mazeData = love.image.newImageData(cfg.mazeImgPath)
-
 function tile.new(grid, x, y)
+	local mazeData = common.imageData
 	local self = setmetatable(lt.new(grid, x, y), tile)
 
 	-- set relative visual coordinates.
@@ -42,39 +40,9 @@ function tile.new(grid, x, y)
 	return self
 end
 
-function tile:draw()
-	if self.color then
-		lg.setColor(self.color)
-		lg.rectangle("fill", self.vx, self.vy, boxSize, boxSize)
-	end
-
-	lg.setColor(0, 0, 0, 1) -- only lines
-	-- Define the four corners of the cell
-	local top = {x = self.vx, y = self.vy}
-	local right = {x = self.vx + boxSize, y = self.vy}
-	local bottom = {x = self.vx + boxSize, y = self.vy + boxSize}
-	local left = {x = self.vx, y = self.vy + boxSize}
-
-	local sides = {top, right, bottom, left}
-
-	for i, v in ipairs(sides) do
-		if self.walls[i] then
-			local n = sides[i + 1]
-			if not n then n = sides[1] end
-			lg.line(v.x, v.y, n.x, n.y)
-		end
-	end
-
-end
-
-local dirs = {
-	{ 0,-1},
-	{ 1, 0},
-	{ 0, 1},
-	{-1, 0}
-}
+local dirs = common.dirMap
 local function withWall(cur, offset)
-	local v = cur.grid:isValidCell(cur.x + dirs[offset][1], cur.y + dirs[offset][2])
+	local v = cur.grid:isValidCell(cur.x + dirs[offset].x, cur.y + dirs[offset].y)
 	if v and not cur.walls[offset] then
 		return v
 	end
@@ -87,6 +55,27 @@ function tile:getNeighbors()
 		if c then table.insert(out, c) end
 	end
 	return out
+end
+
+function tile:setColor(color)
+	assert(not (color[1] == 0 and color[2] == 0 and color[3] == 0))
+
+	local img = common.imageData
+	local px = (self.x - 1) * boxSize + 1
+	local py = (self.y - 1) * boxSize + 1
+
+	for y = 0, boxSize - 1 do
+		for x = 0, boxSize - 1 do
+			local r, g, b, a = img:getPixel(px + x, py + y)
+
+			-- walls are black, leave them
+			if r ~= 0 or g ~= 0 or b ~= 0 then
+				img:setPixel(px + x, py + y, color[1], color[2], color[3], a)
+			end
+		end
+	end
+
+	common.refreshImageData = true
 end
 
 return tile

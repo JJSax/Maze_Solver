@@ -3,6 +3,7 @@
 
 local lg = love.graphics
 local cfg = require "settings"
+local common = require "common"
 
 local Tiles = require "libraries.luatile.init"
 local grid, path
@@ -12,14 +13,17 @@ local moveSpeed = cfg.moveSpeed
 local camera = {x = -800, y = 0, scale = 1}
 local pathPos
 
-local function genMaze()
-	local mazeData = love.image.newImageData(cfg.mazeImgPath)
+local function genMaze(reload)
 
-	local dw, dh = mazeData:getDimensions()
+	if reload == true then
+		common.imageData = love.image.newImageData(cfg.mazeImgPath)
+		common.image = love.graphics.newImage(common.imageData)
+	end
+
+	local dw, dh = common.imageData:getDimensions()
 	local mw, mh = math.floor(dw / boxSize), math.floor(dh / boxSize)
+
 	grid = Tiles.new(require("tile"), mw, mh, true)
-	grid.width = mw
-	grid.height = mh
 	local start, finish
 	local af, bf = false, false
 	for tx = 1, #grid.tiles do
@@ -35,9 +39,7 @@ local function genMaze()
 
 		if af and bf then break end
 	end
-	path = require("pathing.dfs").create(grid, start, finish)
-
-	grid.path = path
+	path = require("pathing.def").create(grid, start, finish)
 
 	return start
 end
@@ -88,6 +90,9 @@ function love.update(dt)
 	if love.keyboard.isDown("d") then
 		camera.x = camera.x - moveSpeed * dt
 	end
+
+	common.refreshImage()
+
 end
 
 -- This function returns a new scale value based on the input delta and current scale
@@ -114,16 +119,10 @@ function love.draw()
 	lg.push("all")
 	lg.translate(camera.x, camera.y)
 	lg.scale(camera.scale)
-
-	local DBG = 0
-	for cell, x, y in grid:iterate() do
-		local tx, ty = lg.transformPoint(cell.vx, cell.vy)
-		if  tx + boxSize * camera.scale > 0 and tx < lg.getWidth()
-		and ty + boxSize * camera.scale > 0 and ty < lg.getHeight() then
-			DBG = DBG + 1
-			cell:draw()
-		end
-	end
+	lg.setColor(1, 1, 1, 1)
+	--fix some lines in maze appearing larger.
+	--! I think it's an issue where the image is being drawn at a fractional position for some reason with scaling
+	lg.draw(common.image, -1, -1)
 
 	do -- Draw the current tile; prevents checking on every tile
 		local cur = path.currentTile
@@ -138,8 +137,6 @@ function love.draw()
 
 	lg.pop()
 	lg.setColor(0,0,0)
-	-- lg.print(DBG)
-	-- lg.print(path.currentTile.x .. ": ".. path.currentTile.y)
 	if path.complete then
 		lg.print(path.path[pathPos].x .. ": ".. path.path[pathPos].y)
 	end
@@ -157,7 +154,7 @@ function love.keypressed(key)
 		cfg.stepsPerFrame = cfg.stepsPerFrame - 1
 		if cfg.stepsPerFrame < 1 then cfg.stepsPerFrame = 1 end
 	elseif key == "r" then
-		genMaze()
+		genMaze(true)
 	end
 end
 function love.keyreleased(key) end

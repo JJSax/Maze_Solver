@@ -4,23 +4,18 @@
 
 -- local HERE = (...):gsub('%.[^%.]+$', '')
 local cfg = require "settings"
+local common = require "common"
 local Pathfinder = require "libraries.luatile.pathfinder"
 
 local def = setmetatable({}, { __index = Pathfinder })
 def.__index = def
 def._VERSION = "0.2.0"
 
-local dirMap = {
-	{ x = 0,  y = -1 },
-	{ x = 1,  y = 0 },
-	{ x = 0,  y = 1 },
-	{ x = -1, y = 0 }
-}
-
 ---Create the def
 function def.create(grid, startTile, target)
 	local self = setmetatable(Pathfinder.new(grid, startTile, target), def)
 
+	local dirMap = common.dirMap
 	local singlePaths = {}
 	for x, v in ipairs(self.grid.tiles) do
 		for y, tile in ipairs(v) do
@@ -45,12 +40,12 @@ end
 
 function def:markDeadEnd(tile)
 	tile.deadEnd = true
-	tile.color = { .2, 0.22, 0.22 }
+	tile:setColor({ .2, 0.22, 0.22 })
 end
 
 function def:exploreTile(tile)
-	tile.color = { 0, 1, 1 }
 	cfg.timerReset = cfg.MOVETIMER
+	tile:setColor({ 0, 1, 1 })
 end
 
 local function constructPath(self)
@@ -83,7 +78,6 @@ function def:step()
 
 		-- look at adjacent tiles for tiles that will have 0 ways to go after this tile is marked as a dead end
 		for _, adjTile in ipairs(tile:getNeighbors()) do
-			-- local adjTile = self.grid(tile.x + dirMap[dir].x, tile.y + dirMap[dir].y)
 			local options = 0
 			for _, d in ipairs(adjTile:getNeighbors()) do
 				if not d.deadEnd then
