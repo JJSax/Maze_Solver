@@ -56,10 +56,10 @@ function love.update(dt)
 	if cfg.moveTimer < 0 and path.complete then
 		cfg.moveTimer = 0.1
 		pathPos = pathPos + 1
-		path.currentTile = path.path[pathPos]
 		if pathPos > #path.path then
 			pathPos = 1
 		end
+		path.currentTile = path.path[pathPos]
 	end
 
 	if cfg.moveTimer < 0 and not cfg.paused and not path.complete then
