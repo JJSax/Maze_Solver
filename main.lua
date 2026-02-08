@@ -10,6 +10,7 @@ local common = require "common"
 local Walls  = require "walls"
 
 local Tiles = require "libraries.luatile.init" -- https://github.com/JJSax/lautile
+local ui = require "ui"
 local grid, path
 
 local boxSize = cfg.boxSize -- includes walls
@@ -144,6 +145,8 @@ function love.draw()
 	if path.complete then
 		lg.print(path.path[pathPos].x .. ": ".. path.path[pathPos].y)
 	end
+
+	ui:draw()
 end
 
 function love.keypressed(key)
