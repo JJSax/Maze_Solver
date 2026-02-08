@@ -23,7 +23,10 @@ function love.load()
 end
 
 function love.update(dt)
-	cfg.moveTimer = cfg.moveTimer - dt
+	if common.run then
+		cfg.moveTimer = cfg.moveTimer - dt
+	end
+
 	if cfg.moveTimer < 0 and common.path.complete then
 		cfg.moveTimer = 0.1
 		pathPos = pathPos + 1
@@ -130,7 +133,9 @@ function love.keypressed(key)
 	end
 end
 function love.keyreleased(key) end
-function love.mousepressed(x, y, button, istouch, presses) end
+function love.mousepressed(x, y, button, istouch, presses)
+	ui:mousepressed(x, y, button)
+end
 function love.mousereleased(x, y, button, istouch, presses) end
 function love.mousemoved(x, y, dx, dy, istouch) end
 function love.wheelmoved(x, y)

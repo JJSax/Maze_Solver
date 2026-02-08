@@ -60,4 +60,6 @@ function common.generateMaze(reload)
 	return start
 end
 
+common.run = false
+
 return common
