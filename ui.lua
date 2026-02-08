@@ -34,17 +34,34 @@ local function run(button)
 	common.run = button.toggled
 end
 
-local function selectAlgorithm(button)
-	local bx = getButtonXLeft(button)
+local function createContextMenu(button, callback)
 	local ch = lg.getHeight() - height / 2
 	local h = contextFont:getHeight() * (#button.menuOptions + 1)
 	contextMenu = {
 		options = button.menuOptions,
-		x = bx,
+		x = getButtonXLeft(button),
 		y = ch - button.height / 2 - h,
 		width = button.width,
-		height = h
+		height = h,
+		callback = callback
 	}
+end
+
+local function algoCallback(option)
+	cfg.pathfinder = option
+	common.generateMaze(true)
+end
+
+local function selectAlgorithm(button)
+	createContextMenu(button, algoCallback)
+end
+
+local function mazeGenCallback()
+
+end
+
+local function selectGenMaze(button)
+
 end
 
 local function new()
@@ -58,7 +75,6 @@ local function new()
 	self.buttons = {
 		algorithm = {
 			x = 0.2,
-			-- y = 0.5,
 			width = aWidth,
 			height = aHeight,
 			text = "Algorithm",
@@ -68,7 +84,6 @@ local function new()
 		},
 		genMaze = {
 			x = 0.8,
-			-- y = 0.5,
 			width = aWidth,
 			height = aHeight,
 			text = "New Maze",
@@ -77,7 +92,6 @@ local function new()
 		},
 		run = {
 			x = 0.5,
-			-- y = 0.5,
 			width = 200,
 			height = 75,
 			text = "Pause",
@@ -92,6 +106,16 @@ end
 
 function ui:update(dt)
 
+end
+
+local function getButtonRect(i, padding)
+	assert(contextMenu, "getButtonRect called without context menu")
+	return {
+		contextMenu.x,
+		contextMenu.y + (i - 1) * (contextFont:getHeight() + padding) + padding,
+		contextMenu.width,
+		contextFont:getHeight()
+	}
 end
 
 function ui:draw()
@@ -125,7 +149,7 @@ function ui:draw()
 
 			-- check if mouse if over option
 			local mx, my = love.mouse.getPosition()
-			local rect = { contextMenu.x, contextMenu.y + (i - 1) * (contextFont:getHeight() + padding) + padding, contextMenu.width, contextFont:getHeight() }
+			local rect = getButtonRect(i, padding)
 			if geometry.inRect(mx, my, table.unpack(rect)) then
 				lg.setColor(0, 0, 0, 0.1)
 				lg.rectangle("fill", table.unpack(rect))
@@ -152,10 +176,9 @@ function ui:mousepressed(x, y, b)
 
 		local padding = 4
 		for i, option in ipairs(contextMenu.options) do
-			local rect = { contextMenu.x, contextMenu.y + (i - 1) * (contextFont:getHeight() + padding) + padding, contextMenu.width, contextFont:getHeight() }
+			local rect = getButtonRect(i, padding)
 			if geometry.inRect(x, y, table.unpack(rect)) then
-				cfg.pathfinder = option
-				common.generateMaze(true)
+				contextMenu.callback(option)
 				contextMenu = nil
 				return
 			end
