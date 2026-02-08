@@ -7,50 +7,15 @@ assert(love and love.graphics, "This code requires the LÖVE framework to run.")
 local lg = love.graphics
 local cfg = require "settings"
 local common = require "common"
-local Walls  = require "walls"
-
-local Tiles = require "libraries.luatile.init" -- https://github.com/JJSax/lautile
 local ui = require "ui"
-local grid, path
 
 local boxSize = cfg.boxSize -- includes walls
 local moveSpeed = cfg.moveSpeed
 local camera = {x = -800, y = 0, scale = 1}
 local pathPos
 
-local function genMaze(reload)
-
-	if reload == true then
-		common.imageData = love.image.newImageData(cfg.mazeImgPath)
-		common.image = love.graphics.newImage(common.imageData)
-	end
-
-	local dw, dh = common.imageData:getDimensions()
-	local mw, mh = math.floor(dw / boxSize), math.floor(dh / boxSize)
-
-	grid = Tiles.new(require("tile"), mw, mh, true)
-	local start, finish
-	local af, bf = false, false
-	for tx = 1, #grid.tiles do
-		if not af and not Walls.has(grid(tx, 1).walls, Walls.TOP) then
-			start = grid(tx, 1)
-			af = true
-		end
-
-		if not bf and not Walls.has(grid(tx, #grid.tiles[1]).walls, Walls.BOTTOM) then
-			finish = grid(tx, mh)
-			bf = true
-		end
-
-		if af and bf then break end
-	end
-	path = require("pathing.dfs").create(grid, start, finish)
-
-	return start
-end
-
 function love.load()
-	local start = genMaze()
+	local start = common.generateMaze()
 	camera.x = lg.getWidth() /2 - start.vx
 	camera.y = lg.getHeight()/2 - start.vy
 
@@ -59,26 +24,26 @@ end
 
 function love.update(dt)
 	cfg.moveTimer = cfg.moveTimer - dt
-	if cfg.moveTimer < 0 and path.complete then
+	if cfg.moveTimer < 0 and common.path.complete then
 		cfg.moveTimer = 0.1
 		pathPos = pathPos + 1
-		if pathPos > #path.path then
+		if pathPos > #common.path.path then
 			pathPos = 1
 		end
-		path.currentTile = path.path[pathPos]
+		common.path.currentTile = common.path.path[pathPos]
 	end
 
-	if cfg.moveTimer < 0 and not cfg.paused and not path.complete then
+	if cfg.moveTimer < 0 and not cfg.paused and not common.path.complete then
 		local div = love.keyboard.isDown("space") and 4 or 1
 		if cfg.hypermode then
 			div = div * 10
 		end
 		cfg.moveTimer = cfg.timerReset / div
 		for _ = 1, cfg.stepsPerFrame do
-			path:step()
+			common.path:step()
 		end
 		-- path:run()
-		if path.complete then
+		if common.path.complete then
 			pathPos = 1
 		end
 	end
@@ -130,20 +95,20 @@ function love.draw()
 	lg.draw(common.image, -1, -1)
 
 	do -- Draw the current tile; prevents checking on every tile
-		local cur = path.currentTile
+		local cur = common.path.currentTile
 		lg.setColor(1, 0.5, 0.5, 1)
 		lg.rectangle("fill", cur.vx , cur.vy , boxSize, boxSize)
 	end
 
-	if path.complete then
+	if common.path.complete then
 		lg.setColor(1,1,1, 0.8)
-		lg.rectangle("fill", path.path[pathPos].vx, path.path[pathPos].vy, cfg.boxSize, cfg.boxSize)
+		lg.rectangle("fill", common.path.path[pathPos].vx, common.path.path[pathPos].vy, cfg.boxSize, cfg.boxSize)
 	end
 
 	lg.pop()
 	lg.setColor(0,0,0)
-	if path.complete then
-		lg.print(path.path[pathPos].x .. ": ".. path.path[pathPos].y)
+	if common.path.complete then
+		lg.print(common.path.path[pathPos].x .. ": ".. common.path.path[pathPos].y)
 	end
 
 	ui:draw()
@@ -161,7 +126,7 @@ function love.keypressed(key)
 		cfg.stepsPerFrame = cfg.stepsPerFrame - 1
 		if cfg.stepsPerFrame < 1 then cfg.stepsPerFrame = 1 end
 	elseif key == "r" then
-		genMaze(true)
+		common.generateMaze(true)
 	end
 end
 function love.keyreleased(key) end

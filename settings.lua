@@ -8,6 +8,7 @@ return {
 	moveTimer = MOVETIMER,
 	timerReset = MOVETIMER,
 	hypermode = false,
+	pathfinder = "dfs",
 
 	-- user
 	moveSpeed = 350,
