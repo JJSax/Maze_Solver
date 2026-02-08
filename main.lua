@@ -1,10 +1,15 @@
 
+assert(love and love.graphics, "This code requires the LÖVE framework to run.") -- https://www.love2d.org/
+
+--todo: gen maze on demand.
+--todo: add UI
+
 local lg = love.graphics
 local cfg = require "settings"
 local common = require "common"
 local Walls  = require "walls"
 
-local Tiles = require "libraries.luatile.init"
+local Tiles = require "libraries.luatile.init" -- https://github.com/JJSax/lautile
 local grid, path
 
 local boxSize = cfg.boxSize -- includes walls
