@@ -66,6 +66,9 @@ function love.update(dt)
 
 	common.refreshImage()
 
+	-- update UI (runs tweens and handles UI state)
+	ui:update(dt)
+
 end
 
 -- This function returns a new scale value based on the input delta and current scale
