@@ -140,7 +140,14 @@ function love.mousepressed(x, y, button, istouch, presses)
 	ui:mousepressed(x, y, button)
 end
 function love.mousereleased(x, y, button, istouch, presses) end
-function love.mousemoved(x, y, dx, dy, istouch) end
+
+function love.mousemoved(x, y, dx, dy, istouch)
+	if love.mouse.isDown(1) and not ui:inBounds(x, y) then
+		camera.x = camera.x + dx
+		camera.y = camera.y + dy
+	end
+end
+
 function love.wheelmoved(x, y)
 	if y == 0 then return end
 

@@ -244,4 +244,9 @@ function ui:mousepressed(x, y, b)
 	end
 end
 
+function ui:inBounds(x, y)
+	local uiHeight = getHeight(self)
+	return geometry.inRect(x, y, 0, lg.getHeight() - uiHeight, lg.getWidth(), uiHeight)
+end
+
 return new()
